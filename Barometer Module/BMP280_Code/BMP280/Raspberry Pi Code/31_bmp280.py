@@ -12,6 +12,7 @@
 import time
 import RPi.GPIO as GPIO
 import smbus
+
 class BMP280:
 	# this value is necessary to calculate the correct height above sealevel
 	# its also included in airport wheather information ATIS named as QNH
@@ -64,8 +65,8 @@ class BMP280:
 	CONFIG = (T_SB <<5) + (FILTER <<2) # combine bits for config
 	CTRL_MEAS = (OSRS_T <<5) + (OSRS_P <<2) + POWER_MODE # combine bits for ctrl_meas
 
-	# print ("CONFIG:",CONFIG)
-	# print ("CTRL_MEAS:",CTRL_MEAS)
+#	print ("CONFIG:",CONFIG)
+#	print ("CTRL_MEAS:",CTRL_MEAS)
 
 	BMP280_REGISTER_DIG_T1 = 0x88
 	BMP280_REGISTER_DIG_T2 = 0x8A
@@ -97,18 +98,21 @@ class BMP280:
 					'Pi 3 Model B',
 					'Pi 2 Model B',
 					'Pi2 Model B',
-					'Model B+']
+					'Model B+',
+					'Pi 4 Model B']
 
 	_DEBUG = False
 	_DEBUG_INFO = 'DEBUG "BMP280.py":'
 
-	def __init__(self, bus_number=None, address=0x77):
+	def __init__(self, bus_number=None, address=0x76): #<----- address was bane of my existence
 		self.address = address
 		if bus_number == None:
 			self.bus_number = self._get_bus_number()
 		else:
 			self.bus_number = bus_number
+
 		self.bus = smbus.SMBus(self.bus_number)
+		time.sleep(1) #wait for I2C to settle
 
 		self.dig_T1 = 0.0
 		self.dig_T2 = 0.0
@@ -223,9 +227,9 @@ class BMP280:
 		var2=press*self.dig_P8/32768.0 # formula for pressure from datasheet
 		press=press+(var1+var2+self.dig_P7)/16.0 # formula for pressure from datasheet
 
-		#altitude= 44330.0 * (1.0 - pow(press / (self.QNH*100), (1.0/5.255))) # formula for altitude from airpressure
+		altitude= 44330.0 * (1.0 - pow(press / (self.QNH*100), (1.0/5.255))) # formula for altitude from airpressure
 
-		return temp, press/ 100.0
+		return temp, press/ 100.0, altitude
 
 def main():
 	bmp = BMP280()
@@ -234,9 +238,10 @@ def main():
 	if chip_id == 88:
 		bmp.reg_check()
 
-		temperature, pressure = bmp.read()
+		temperature, pressure, altitude = bmp.read()
 		print("Temperature : %2.2f `C" % temperature)
 		print("Pressure    : %5.4f mbar" % pressure)
+		print("Altitude    : %5.4f " % altitude)
 		print ""
 	else:
 		print("Error")
