@@ -256,6 +256,8 @@ if __name__=="__main__":
         print("Serial bus is open: " + str(ser.is_open))
 
         while True:
+            print("<------------------------>")
+            print("<------------------------>")
             main()
 
             line = ser.readline().decode('ascii', errors='replace')
@@ -263,3 +265,4 @@ if __name__=="__main__":
             msg = pynmea2.parse(ser.readline().decode('ascii', errors='replace'))
             fields = {k: getattr(msg, k) for k in msg.name_to_idx}
             print(fields)
+
