@@ -12,6 +12,10 @@
 import time
 import RPi.GPIO as GPIO
 import smbus
+import os #usb
+import time #usb
+from time import sleep #usb
+from datetime import datetime #usb
 
 class BMP280:
 	# this value is necessary to calculate the correct height above sealevel
@@ -248,6 +252,22 @@ def main():
 		print("Chip ID     : %d" % chip_id)
 		print("Version     : %d" % chip_version)
 		time.sleep(1)
+
+	#usb
+	filepath = "/media/pi/ESD-USB/datalog_OBATS/data_log.csv"
+	file = open(filepath, 'a')
+#	i = 0
+	if os.stat(filepath).st_size == 0:
+		file.write("Time, Altitude(m)\n")
+#	while True:
+#		i = i+1
+
+	now = datetime.now()
+	file.write(str(now)+","+str(altitude)+"\n")
+	file.flush()
+#	time.sleep(5)
+	file.close()
+
 
 	
 if __name__=="__main__":
