@@ -243,7 +243,7 @@ def main():
 		temperature, pressure, altitude = bmp.read()
 		print("Temperature : %2.2f `C" % temperature)
 		print("Pressure    : %5.4f mbar" % pressure)
-		print("Altitude    : %5.4f " % altitude)
+		print("Altitude    : %5.4f m" % altitude)
 		print ""
 	else:
 		print("Error")
