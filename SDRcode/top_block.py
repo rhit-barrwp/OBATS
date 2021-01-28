@@ -3,7 +3,7 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: Top Block
-# Generated: Fri Dec 18 01:10:44 2020
+# Generated: Thu Jan 28 14:49:00 2021
 ##################################################
 
 from distutils.version import StrictVersion
@@ -26,8 +26,8 @@ from gnuradio import gr
 from gnuradio.eng_option import eng_option
 from gnuradio.filter import firdes
 from optparse import OptionParser
+import numpy
 import osmosdr
-import pmt
 import sys
 import time
 from gnuradio import qtgui
@@ -71,12 +71,12 @@ class top_block(gr.top_block, Qt.QWidget):
         self.packet_size = packet_size = 8
         self.low_freq = low_freq = 50e3
         self.freq_spread = freq_spread = 50e3
-        self.carrier_freq = carrier_freq = 2.49e9
+        self.carrier_freq = carrier_freq = 900e6
 
         ##################################################
         # Blocks
         ##################################################
-        self.osmosdr_sink_1 = osmosdr.sink( args="numchan=" + str(1) + " " + 'bladerf[=0|000287aa5fdd4950816aa7337eb066f4]' )
+        self.osmosdr_sink_1 = osmosdr.sink( args="numchan=" + str(1) + " " + '' )
         self.osmosdr_sink_1.set_sample_rate(samp_rate)
         self.osmosdr_sink_1.set_center_freq(carrier_freq, 0)
         self.osmosdr_sink_1.set_freq_corr(0, 0)
@@ -93,17 +93,16 @@ class top_block(gr.top_block, Qt.QWidget):
         self.blocks_uchar_to_float_0 = blocks.uchar_to_float()
         self.blocks_repeat_0 = blocks.repeat(gr.sizeof_char*1, repeat)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_vff((2*3.14*freq_spread/sensitivity, ))
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, '/home/pi/OBATS/SDRcode/OBATStest.txt', True)
-        self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
         self.blocks_add_const_vxx_0 = blocks.add_const_vff((2*3.14*low_freq/sensitivity, ))
+        self.analog_random_source_x_0 = blocks.vector_source_b(map(int, numpy.random.randint(0, 2, 1000)), True)
 
 
 
         ##################################################
         # Connections
         ##################################################
+        self.connect((self.analog_random_source_x_0, 0), (self.blocks_unpack_k_bits_bb_0, 0))
         self.connect((self.blocks_add_const_vxx_0, 0), (self.blocks_vco_c_0, 0))
-        self.connect((self.blocks_file_source_0, 0), (self.blocks_unpack_k_bits_bb_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_add_const_vxx_0, 0))
         self.connect((self.blocks_repeat_0, 0), (self.blocks_uchar_to_float_0, 0))
         self.connect((self.blocks_uchar_to_float_0, 0), (self.low_pass_filter_0, 0))
