@@ -1,5 +1,6 @@
 For this command First set a the Raspberry Pi as dhcp server running on Country code US wifi protocol "a" channel 44
 Connect to the Wi-Fi and record the IP address of your laptop i.e. 192.168.4.x
+once set up should b accessable for ssh using: ssh pi@192.168.4.1
 replace IP address of both server and basestation code with the device IP port 5005 should work
 run both codes simultaneously
 UDP message should be recieved at Basestation
