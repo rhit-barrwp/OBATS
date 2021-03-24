@@ -33,20 +33,9 @@ def animate(i):
     for line in lines:
         if len(line)>1:
             time,xstr,ystr,zstr = line.split(',')
-            
-            if (float(xstr) == 0):
-                x = float(xstr) + randrange(10)
-            else:
-                x = float(xstr)
-            if (float(ystr) == 0):
-                y = float(ystr) + randrange(10)
-            else:
-                y = float(ystr)
-            if (float(zstr) == 0):
-                z = float(zstr) + randrange(10)
-            else:
-                z = float(zstr)
-
+            x = float(xstr)
+            y = float(ystr)     
+            z = float(zstr)
             xar.append(x)
             yar.append(y)
             zar.append(z)
