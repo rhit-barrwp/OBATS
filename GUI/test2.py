@@ -3,9 +3,29 @@ import matplotlib.animation as animation
 import time
 from random import randrange
 from threading import Thread
+import socket
 
 fig = plt.figure(facecolor='#2e2e2e')
 ax1 = fig.add_subplot(111, projection='3d')
+
+def udpReader():
+    try:
+        UDP_IP = "192.168.4.11" # IP address of base station
+        UDP_PORT = 5005
+
+        sock = socket.socket(socket.AF_INET, # Internet
+                            socket.SOCK_DGRAM) # UDP
+        sock.bind((UDP_IP, UDP_PORT))
+
+        print("UDP start")
+        while True:
+            data, addr = sock.recvfrom(128)
+            print("received message: %s" % data)
+            file = open("incomingData.txt", "a")
+            file.write(data.decode('utf-8') + '\n')
+            file.close()
+    except:
+        print("Couldn't open socket")
 
 def LastNlines(fname, N):
     assert N >= 0
@@ -45,8 +65,9 @@ def animate(i):
         ax1.plot3D([xar[x],xar[x+1]], [yar[x],yar[x+1]], [zar[x],zar[x+1]], linestyle='--', c='white')
 
 def Main():
-    # t1=Thread(target=FileWriter)
-    # t1.start()
+    t1=Thread(target=udpReader)
+    t1.start()
+    
     ani = animation.FuncAnimation(fig, animate, interval=1000)
 
     ax1.set_xlabel('X')
