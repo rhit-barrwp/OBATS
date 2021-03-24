@@ -32,11 +32,24 @@ def animate(i):
     lines = LastNlines(fname,N)
     for line in lines:
         if len(line)>1:
-            time,x,y,z = line.split(',')
-            xar.append(float(x))
-            yar.append(float(y))
-            zar.append(float(z))
-    print(xar)
+            time,xstr,ystr,zstr = line.split(',')
+            
+            if (float(xstr) == 0):
+                x = float(xstr) + randrange(10)
+            else:
+                x = float(xstr)
+            if (float(ystr) == 0):
+                y = float(ystr) + randrange(10)
+            else:
+                y = float(ystr)
+            if (float(zstr) == 0):
+                z = float(zstr) + randrange(10)
+            else:
+                z = float(zstr)
+
+            xar.append(x)
+            yar.append(y)
+            zar.append(z)
     ax1.clear()
     ax1.scatter(xar, yar, zar, s=50, c='green')
     for x in range(0, N-1):
