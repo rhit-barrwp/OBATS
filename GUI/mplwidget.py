@@ -51,15 +51,15 @@ class MplWidget(QWidget):
 
         def animate(i):
             self.canvas.axes.clear()
-            fname = "data.txt"
-            N = 3
+            fname = "../UDPLink/incomingData.txt"
+            N = 5
             try:
                 xar = []
                 yar = []
                 zar = []
                 lines = LastNlines(fname,N)
                 for line in lines:
-                    x,y,z = line.split(',')
+                    time,x,y,z = line.split(',')
                     xar.append(float(x))
                     yar.append(float(y))
                     zar.append(float(z))
