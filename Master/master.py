@@ -14,6 +14,8 @@ import RPi.GPIO as GPIO
 import smbus
 import serial
 import pynmea2
+import datetime
+import pprint
 
 class BMP280:
 	# this value is necessary to calculate the correct height above sealevel
@@ -183,11 +185,11 @@ class BMP280:
 	def reg_check(self):
 		#print addr
 		self._write_byte_data(self.BMP280_REGISTER_SOFTRESET, 0xB6)
-		time.sleep(0.2)
+	        time.sleep(0.2)	
 		self._write_byte_data(self.BMP280_REGISTER_CONTROL, self.CTRL_MEAS)
-		time.sleep(0.2)
+	        time.sleep(0.2)	
 		self._write_byte_data(self.BMP280_REGISTER_CONFIG, self.CONFIG)
-		time.sleep(0.2)
+	        time.sleep(0.2)	
 
 		self.dig_T1 = self._read_word_data_unsigned(self.BMP280_REGISTER_DIG_T1) # read correction settings
 		self.dig_T2 = self._read_word_data_signed(self.BMP280_REGISTER_DIG_T2)
@@ -233,7 +235,7 @@ class BMP280:
 
 		return temp, press/ 100.0, altitude
 
-def main():
+def bmp(filename):
 	bmp = BMP280()
 	chip_id, chip_version = bmp.read_id()
 
@@ -245,6 +247,10 @@ def main():
 		print("Pressure    : %5.4f mbar" % pressure)
 		print("Altitude    : %5.4f m" % altitude)
 		print ""
+                print(filename)
+                file = open(filename, "a")
+                file.write(str(temperature) + "," + str(pressure) + "," + str(altitude) + ",")
+                file.close() 
 	else:
 		print("Error")
 		print("Chip ID     : %d" % chip_id)
@@ -255,14 +261,75 @@ if __name__=="__main__":
     with serial.Serial('/dev/ttyS0', baudrate=9600, timeout=1) as ser:
         print("Serial bus is open: " + str(ser.is_open))
 
-        while True:
-            print("<------------------------>")
-            print("<------------------------>")
-            main()
+        now = str(datetime.datetime.now())
+        extension = ".txt"
+        filename = "log/" + now + extension
 
+        x = 0
+        while x < 20:
+ 
             line = ser.readline().decode('ascii', errors='replace')
-            print(line.strip())
-            msg = pynmea2.parse(ser.readline().decode('ascii', errors='replace'))
-            fields = {k: getattr(msg, k) for k in msg.name_to_idx}
-            print(fields)
+            #print(line.strip())
 
+            if (line.strip().startswith("$GNGLL")):
+                file = open(filename, "a")
+                print("---")
+                bmp = BMP280()
+                chip_id, chip_version = bmp.read_id()
+                bmp.reg_check()
+                temperature, pressure, altitude = bmp.read()
+                file.write(str(altitude) + ",")
+                print("Altitude:  [" + str(altitude) + "]")
+
+                msg = pynmea2.parse(line)
+                fields = {k: getattr(msg, k) for k in msg.name_to_idx}
+                pprint.pprint(fields)
+
+                if (getattr(msg, "status") == "V"):
+                    print("Status:    [Navigation Receiver Warning]")
+                elif (getattr(msg, "status") == "A"):
+                    print("Status:    [Data Valid]")
+                file.write(getattr(msg, "status") + ",")
+
+                if (isinstance(getattr(msg, "timestamp"), datetime.time)):
+                    print("Time:      [" + getattr(msg, "timestamp").strftime("%H:%M:%S") + "]")
+                    file.write(getattr(msg, "timestamp").strftime("%H:%M:%S") + ",")
+                else:
+                    print("Time:      []")
+                    file.write(",")
+
+                print("Longitude: [" + getattr(msg, "lon") + "]")
+                file.write(getattr(msg, "lon") + ",")
+
+                print("Long. Dir: [" + getattr(msg, "lon_dir") + "]")
+                file.write(getattr(msg, "lon_dir") + ",")
+
+                print("Latitude:  [" + getattr(msg, "lat") + "]")
+                file.write(getattr(msg, "lat") + ",")
+
+                print("Lat. Dir:  [" + getattr(msg, "lat_dir") + "]")
+                file.write(getattr(msg, "lat_dir") + ",")
+
+                if (getattr(msg, "faa_mode") == "N"):
+                    print("Mode:      [Not Valid]")
+                elif (getattr(msg, "faa_mode") == "A"):
+                    print("Mode:      [Autonomous]")
+                elif (getattr(msg, "faa_mode") == "D"):
+                    print("Mode:      [Differential]")
+                elif (getattr(msg, "faa_mode") == "E"):
+                    print("Mode:      [Estimated]")
+                file.write(getattr(msg, "faa_mode") + "\n")
+
+                file.close()
+
+            #line = ser.readline()
+            #print(line)
+
+            #msg = pynmea2.parse(ser.readline().decode('ascii', errors='replace'))
+            #fields = {k: getattr(msg, k) for k in msg.name_to_idx}
+            #pprint.pprint(fields)
+
+            
+                
+        file.close()
+        print("Goodbye")
