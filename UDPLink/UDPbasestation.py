@@ -1,6 +1,6 @@
 import socket
 
-UDP_IP = "192.168.4.7" # IP address of base station
+UDP_IP = "192.168.4.11" # IP address of base station
 UDP_PORT = 5005
 
 sock = socket.socket(socket.AF_INET, # Internet
@@ -11,4 +11,6 @@ print("UDP start")
 while True:
     data, addr = sock.recvfrom(128) # buffer size is 1024 bytes
     print("received message: %s" % data)
-	
+    file = open("incomingData.txt", "a")
+    file.write(data.decode('utf-8') + '\n')
+    file.close()
