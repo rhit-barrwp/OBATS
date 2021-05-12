@@ -44,8 +44,8 @@ def LastNlines(fname, N):
     return lines[-N:]
 
 def animate(i):
-    fname = "../UDPLink/incomingData.txt"
-    N = 5
+    fname = "incomingData.txt"
+    N = 20
     xar = []
     yar = []
     zar = []
@@ -61,7 +61,8 @@ def animate(i):
             zar.append(z)
     ax1.clear()
     ax1.scatter(xar, yar, zar, s=50, c='green')
-    for x in range(0, N-1):
+
+    for x in range(0, len(xar)-1):
         ax1.plot3D([xar[x],xar[x+1]], [yar[x],yar[x+1]], [zar[x],zar[x+1]], linestyle='--', c='white')
 
 def Main():
